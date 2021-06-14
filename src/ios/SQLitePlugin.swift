@@ -23,6 +23,39 @@ class SQLitePlugin : CDVPlugin {
         
         self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
     }
+
+    @objc(insert:)
+    func insert(command: CDVInvokedUrlCommand) {
+        var pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR)
+        
+        let insertStatementString = String(describing: command.argument(at: 0)!)
+        var insertStatementQuery: OpaquePointer?
+        
+        DispatchQueue.main.async {
+            if sqlite3_prepare_v2(self.dbQueue, insertStatementString, -1, &insertStatementQuery, nil) == SQLITE_OK {
+
+                sqlite3_bind_int(insertStatementQuery, 1, command.argument(at: 1)! as! Int32)
+                sqlite3_bind_text(insertStatementQuery, 2, String(describing: command.argument(at: 2)!), -1, self.SQLITE_TRANSIENT)
+                sqlite3_bind_text(insertStatementQuery, 3, String(describing: command.argument(at: 3)!), -1, self.SQLITE_TRANSIENT)
+                sqlite3_bind_text(insertStatementQuery, 4, String(describing: command.argument(at: 4)!), -1, self.SQLITE_TRANSIENT)
+                sqlite3_bind_text(insertStatementQuery, 5, String(describing: command.argument(at: 5)!), -1, self.SQLITE_TRANSIENT)
+                sqlite3_bind_text(insertStatementQuery, 6, String(describing: command.argument(at: 6)!), -1, self.SQLITE_TRANSIENT)
+                sqlite3_bind_text(insertStatementQuery, 7, String(describing: command.argument(at: 7)!), -1, self.SQLITE_TRANSIENT)
+                sqlite3_bind_text(insertStatementQuery, 8, String(describing: command.argument(at: 8)!), -1, self.SQLITE_TRANSIENT)
+                if sqlite3_step(insertStatementQuery) == SQLITE_DONE {
+                    print("Successfully Inserted the record")
+                    pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Successfully Inserted the record")
+                } else {
+                    print("Error")
+                    pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Error")
+                }
+
+                sqlite3_finalize(insertStatementQuery)
+            }
+        }
+        
+        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
+    }
     
     func createAndOpenDatabase() -> OpaquePointer? {
         var db: OpaquePointer?
